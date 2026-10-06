@@ -2,7 +2,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
+  const teacherLoginForm = document.getElementById("teacher-login-form");
+  const teacherSession = document.getElementById("teacher-session");
+  const teacherActions = document.getElementById("teacher-actions");
+  const teacherStatus = document.getElementById("teacher-status");
   const messageDiv = document.getElementById("message");
+  let teacherAuthorization = null;
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -12,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      activitySelect.replaceChildren(new Option("-- Select an activity --", ""));
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -30,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${details.participants
                   .map(
                     (email) =>
-                      `<li><span class="participant-email">${email}</span><button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button></li>`
+                      `<li><span class="participant-email">${email}</span>${teacherAuthorization ? `<button class="delete-btn" data-activity="${name}" data-email="${email}">❌</button>` : ""}</li>`
                   )
                   .join("")}
               </ul>
@@ -80,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
         )}/unregister?email=${encodeURIComponent(email)}`,
         {
           method: "DELETE",
+          headers: { Authorization: teacherAuthorization },
         }
       );
 
@@ -110,6 +117,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  teacherLoginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const username = document.getElementById("teacher-username").value;
+    const password = document.getElementById("teacher-password").value;
+    const authorization = `Basic ${btoa(`${username}:${password}`)}`;
+
+    try {
+      const response = await fetch("/auth/teacher", {
+        method: "POST",
+        headers: { Authorization: authorization },
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.detail || "Teacher sign in failed");
+      }
+
+      teacherAuthorization = authorization;
+      teacherLoginForm.classList.add("hidden");
+      teacherSession.classList.remove("hidden");
+      teacherActions.classList.remove("hidden");
+      teacherStatus.textContent = "Signed in as a teacher.";
+      teacherLoginForm.reset();
+      messageDiv.classList.add("hidden");
+      fetchActivities();
+    } catch (error) {
+      messageDiv.textContent = error.message || "Teacher sign in failed";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
+    }
+  });
+
+  document.getElementById("teacher-logout").addEventListener("click", () => {
+    teacherAuthorization = null;
+    teacherLoginForm.classList.remove("hidden");
+    teacherSession.classList.add("hidden");
+    teacherActions.classList.add("hidden");
+    teacherStatus.textContent = "Sign in to manage registrations.";
+    fetchActivities();
+  });
+
   // Handle form submission
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -124,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         )}/signup?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
+          headers: { Authorization: teacherAuthorization },
         }
       );
 

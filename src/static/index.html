@@ -22,22 +22,40 @@
       </section>
 
       <section id="signup-container">
-        <h3>Sign Up for an Activity</h3>
-        <form id="signup-form">
+        <h3>Teacher Access</h3>
+        <form id="teacher-login-form">
           <div class="form-group">
-            <label for="email">Student Email:</label>
-            <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+            <label for="teacher-username">Username:</label>
+            <input type="text" id="teacher-username" autocomplete="username" required />
           </div>
           <div class="form-group">
-            <label for="activity">Select Activity:</label>
-            <select id="activity" required>
-              <option value="">-- Select an activity --</option>
-              <!-- Activity options will be loaded here -->
-            </select>
+            <label for="teacher-password">Password:</label>
+            <input type="password" id="teacher-password" autocomplete="current-password" required />
           </div>
-          <button type="submit">Sign Up</button>
+          <button type="submit">Log In</button>
         </form>
-        <div id="message" class="hidden"></div>
+        <div id="teacher-session" class="hidden">
+          <p>Teacher access is active.</p>
+          <button id="teacher-logout" type="button">Log Out</button>
+        </div>
+        <p id="teacher-status" role="status">Sign in to manage registrations.</p>
+        <div id="message" class="hidden" aria-live="polite"></div>
+        <div id="teacher-actions" class="hidden">
+          <h3>Sign Up for an Activity</h3>
+          <form id="signup-form">
+            <div class="form-group">
+              <label for="email">Student Email:</label>
+              <input type="email" id="email" required placeholder="your-email@mergington.edu" />
+            </div>
+            <div class="form-group">
+              <label for="activity">Select Activity:</label>
+              <select id="activity" required>
+                <option value="">-- Select an activity --</option>
+              </select>
+            </div>
+            <button type="submit">Sign Up</button>
+          </form>
+        </div>
       </section>
     </main>
 
